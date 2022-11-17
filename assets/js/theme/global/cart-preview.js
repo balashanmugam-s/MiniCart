@@ -1,13 +1,14 @@
 import 'foundation-sites/js/foundation/foundation';
 import 'foundation-sites/js/foundation/foundation.dropdown';
 import utils from '@bigcommerce/stencil-utils';
+import { normalizeFormData } from '../common/utils/api';
 
-export const CartPreviewEvents = {
+const CartPreviewEvents = {
     close: 'closed.fndtn.dropdown',
     open: 'opened.fndtn.dropdown',
 };
 
-export default function (secureBaseUrl, cartId) {
+const cartPreview = (secureBaseUrl, cartId) => {
     const loadingClass = 'is-loading';
     const $cart = $('[data-cart-preview]');
     const $cartDropdown = $('#cart-preview-dropdown');
@@ -101,3 +102,149 @@ export default function (secureBaseUrl, cartId) {
         $body.trigger('cart-quantity-update', quantity);
     }
 }
+
+class slideCart{
+    constructor(){
+        console.log("Slide Cart");
+        this.cartClass = "#cart-preview-dropdown .previewCartWrapper";
+        this.qtyInputChange = ".previewCartItem .form-increment .cart-item-qty-input";
+        this.qtyChange = ".previewCartItem .form-increment .button--icon";
+        
+        this.$overlay = $('[data-cart] .loadingOverlay');
+        this.$cartDropdown = $('#cart-preview-dropdown');
+        this.$cartLoading = $('<div class="loadingOverlay"></div>');
+        this.loadingClass = 'is-loading';
+        this.$body = $('body');
+        this.$cart = $('[data-cart-preview]');
+        this.bodyOverlay = ".previewCartOverlay";
+        this.$PLPAddCart = $("[data-button-type='add-cart']");
+        const this_ = this;
+
+        $(document).on('click','[data-cart-preview]',function(e){
+            e.preventDefault();
+            console.log("Data Cart Preview");
+            this_.open();
+        });
+        $("body").click(function(e) {
+            if (e.target.id != "cart-preview-dropdown" && $(e.target).parents("#cart-preview-dropdown").length == 0) {
+                this_.close();
+            }
+        });
+
+        if(this.$PLPAddCart.length > 0){
+            $(document).on('click',"[data-button-type='add-cart']",function(e){
+                e.preventDefault();
+                var productId = parseInt($(this).attr("data-product-id"));
+                console.log("Data Cart Preview");
+                this_.addCart(productId,'',1);
+            });
+        }
+    }
+
+    bindEvents(){
+        const this_ = this;
+        // $(document).on('click',this.cartClass,function(){
+        //     return false;
+        // });
+        // Quantity Change // 
+        $(document).on('click',this.qtyChange,function(){
+            var qty=0;
+            var itemId = $(this).attr("data-cart-itemid");
+            if($(this).attr("data-action") == "dec"){
+                qty = parseInt($(this).next(".cart-item-qty-input").val());
+                qty = qty - 1;
+                if(qty>0){
+                    $(this).next(".cart-item-qty-input").val(qty);
+                }
+            }
+            if($(this).attr("data-action") == "inc"){
+                qty = parseInt($(this).prev(".cart-item-qty-input").val());
+                qty = qty + 1;
+                if(qty>0){
+                    $(this).prev(".cart-item-qty-input").val(qty);
+                }
+            }
+            if(qty>0){
+                this_.qtyUpdate(itemId,qty);
+            }
+
+        });
+        $(document).on('change',this.qtyInputChange,function(){
+            var itemId = $(this).attr("data-cart-itemid");
+            var qty = parseInt($(this).val());
+            if(qty>0){
+                this_.qtyUpdate(itemId,qty);
+            }
+        });
+        // Quantity Change //
+    }
+    open(){
+        this.showBodyOverlay();
+        this.showOverlay();
+        this.refreshContent();
+        this.bindEvents();
+        this.$cartDropdown.addClass('is-open');
+    }
+    close(){
+        this.$cartDropdown.removeClass('is-open');
+        this.closeOverlay();
+        this.closeBodyOverlay();
+    }
+    showBodyOverlay(){
+        this.$body.addClass("cart-open");
+        $(this.bodyOverlay).fadeIn(300);
+    }
+    closeBodyOverlay(){
+        this.$body.removeClass("cart-open");
+        $(this.bodyOverlay).fadeOut(300);
+    }
+    showOverlay(){
+        this.showBodyOverlay();
+        this.$cartDropdown
+            .addClass(this.loadingClass)
+            .html(this.$cartLoading);
+        this.$cartLoading
+            .show();
+        this.$cartDropdown.addClass('is-open');
+    }
+    closeOverlay(){
+        // $(this.bodyOverlay).fadeOut(300);
+        this.$cartDropdown
+        .removeClass(this.loadingClass);
+        this.$cartLoading.hide();
+    }
+    qtyUpdate(itemId, newQty){
+        // Update should be done using utils call.        
+        // Inside Minicart quantity change occurs here.
+        this.showOverlay();
+        utils.api.cart.itemUpdate(itemId, newQty, (err, response) => {
+            this.refreshContent();
+        });
+    }
+    addCart(productId,qty) {
+        // Add products to cart(Added from PLP card and Related Products Card)
+        const this_ = this;
+        var formData = new FormData();
+        formData.append("action", "add");
+        formData.append("product_id", productId);
+        formData.append("qty[]", qty);
+        utils.api.cart.itemAdd(normalizeFormData(formData), (err, response) => {
+            this_.open();
+        });
+    };
+    refreshContent() {
+        const options = {
+            template: 'common/cart-preview'
+        };
+
+        utils.api.cart.getContent(options, (err, response) => {
+            this.closeOverlay();
+            this.$cartDropdown
+            .removeClass(this.loadingClass)
+            .html(response);
+        });
+    }
+
+}
+
+export {cartPreview, CartPreviewEvents, slideCart};
