@@ -12,6 +12,7 @@ import { normalizeFormData } from './utils/api';
 import { isBrowserIE, convertIntoArray } from './utils/ie-helpers';
 import bannerUtils from './utils/banner-utils';
 import currencySelector from '../global/currency-selector';
+import { slideCart } from '../global/cart-preview';
 
 export default class ProductDetails extends ProductDetailsBase {
     constructor($scope, context, productAttributesData = {}) {
@@ -422,24 +423,27 @@ export default class ProductDetails extends ProductDetailsBase {
                 return showAlertModal(tmp.textContent || tmp.innerText);
             }
 
-            // Open preview modal and update content
-            if (this.previewModal) {
-                this.previewModal.open();
+            const SlideCart = new slideCart();
+            SlideCart.open();
 
-                if (window.ApplePaySession) {
-                    this.previewModal.$modal.addClass('apple-pay-supported');
-                }
+            // // Open preview modal and update content
+            // if (this.previewModal) {
+            //     this.previewModal.open();
 
-                if (!this.checkIsQuickViewChild($addToCartBtn)) {
-                    this.previewModal.$preModalFocusedEl = $addToCartBtn;
-                }
+            //     if (window.ApplePaySession) {
+            //         this.previewModal.$modal.addClass('apple-pay-supported');
+            //     }
 
-                this.updateCartContent(this.previewModal, response.data.cart_item.id);
-            } else {
-                this.$overlay.show();
-                // if no modal, redirect to the cart page
-                this.redirectTo(response.data.cart_item.cart_url || this.context.urls.cart);
-            }
+            //     if (!this.checkIsQuickViewChild($addToCartBtn)) {
+            //         this.previewModal.$preModalFocusedEl = $addToCartBtn;
+            //     }
+
+            //     this.updateCartContent(this.previewModal, response.data.cart_item.id);
+            // } else {
+            //     this.$overlay.show();
+            //     // if no modal, redirect to the cart page
+            //     this.redirectTo(response.data.cart_item.cart_url || this.context.urls.cart);
+            // }
         });
 
         this.setLiveRegionAttributes($addToCartBtn.next(), 'status', 'polite');

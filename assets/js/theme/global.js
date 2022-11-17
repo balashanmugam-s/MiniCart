@@ -9,7 +9,7 @@ import mobileMenuToggle from './global/mobile-menu-toggle';
 import menu from './global/menu';
 import foundation from './global/foundation';
 import quickView from './global/quick-view';
-import cartPreview from './global/cart-preview';
+import { slideCart } from './global/cart-preview';
 import privacyCookieNotification from './global/cookieNotification';
 import carousel from './common/carousel';
 import svgInjector from './global/svg-injector';
@@ -17,7 +17,7 @@ import svgInjector from './global/svg-injector';
 export default class Global extends PageManager {
     onReady() {
         const { cartId, secureBaseUrl } = this.context;
-        cartPreview(secureBaseUrl, cartId);
+        new slideCart();
         quickSearch();
         currencySelector(cartId);
         foundation($(document));

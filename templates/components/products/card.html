@@ -101,7 +101,7 @@
                             <a href="{{pre_order_add_to_cart_url}}" data-event-type="product-click" class="button button--small card-figcaption-button">{{lang 'products.pre_order'}}</a>
                         {{/if}}
                         {{#if add_to_cart_url }}
-                            <a href="{{add_to_cart_url}}" data-event-type="product-click" data-button-type="add-cart" class="button button--small card-figcaption-button">{{lang 'products.add_to_cart'}}</a>
+                            <a href="{{add_to_cart_url}}" data-event-type="product-click" data-button-type="add-cart" data-product-id="{{id}}" class="button button--small card-figcaption-button">{{lang 'products.add_to_cart'}}</a>
                             <span class="product-status-message aria-description--hidden">{{lang 'category.add_cart_announcement'}}</span>
                         {{/if}}
                         {{#if out_of_stock_message }}

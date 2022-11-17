@@ -1,8 +1,9 @@
 <div class="previewCartWrapper">
   <div class="previewCart">
     {{#if cart.items.length}}
-        <ul class="previewCartList">
-            {{#each (limit cart.items 4)}}
+        <h3 class="cart-title">Your Cart</h3>
+        <ul class="previewCartList" data-cart-id="{{cart_id}}">
+            {{#each cart.items}}
                 <li class="previewCartItem">
                     <div class="previewCartItem-image">
                         {{#if type '==' 'GiftCertificate'}}
@@ -29,6 +30,50 @@
                                 <a href="{{url}}" alt="{{name}}" title="{{name}}">{{name}}</a>
                             </h6>
 
+                            <div class="cart-item-block cart-item-info cart-item-quantity">
+                                <label class="form-label cart-item-label" for="qty-{{id}}">{{lang 'products.quantity'}}</label>
+                                <div class="form-increment">
+                                    {{#if can_modify}}
+                                        <button class="button button--icon"
+                                                data-cart-update
+                                                data-cart-itemid="{{id}}"
+                                                data-product-id="{{product_id}}"
+                                                data-action="dec"
+                                        >
+                                            <span class="is-srOnly">{{lang 'products.quantity_decrease' name=name}}</span>
+                                            <i class="icon" aria-hidden="true"><svg><use xlink:href="#icon-keyboard-arrow-down" /></svg></i>
+                                        </button>
+                                    {{/if}}
+                                    <input class="form-input form-input--incrementTotal cart-item-qty-input"
+                                           id="qty-{{id}}"
+                                           name="qty-{{id}}"
+                                           type="tel"
+                                           value="{{quantity}}"
+                                           data-quantity-min="{{min_purchase_quantity}}"
+                                           data-quantity-max="{{max_purchase_quantity}}"
+                                           data-quantity-min-error="{{lang 'products.quantity_min' quantity=min_purchase_quantity}}"
+                                           data-quantity-max-error="{{lang 'products.quantity_max' quantity=max_purchase_quantity}}"
+                                           min="1"
+                                           pattern="[0-9]*"
+                                           data-product-id="{{product_id}}"
+                                           data-cart-itemid="{{id}}"
+                                           data-action="manualQtyChange"
+                                           aria-label="{{name}}"
+                                           aria-live="polite"{{#unless can_modify}} disabled{{/unless}}>
+                                    {{#if can_modify}}
+                                        <button class="button button--icon"
+                                                data-cart-update
+                                                data-cart-itemid="{{id}}"
+                                                data-product-id="{{product_id}}"
+                                                data-action="inc"
+                                        >
+                                            <span class="is-srOnly">{{lang 'products.quantity_increase' name=name}}</span>
+                                            <i class="icon" aria-hidden="true"><svg><use xlink:href="#icon-keyboard-arrow-up" /></svg></i>
+                                        </button>
+                                    {{/if}}
+                                </div>
+                            </div>
+
                             <span class="previewCartItem-price">
                                 {{#if quantity '>' 1}}
                                     {{quantity}} &times;
@@ -44,31 +89,31 @@
                             </span>
                         </div>
                     </li>
-                {{/each}}
-            </ul>
-            <div class="previewCartAction">
-                {{#if cart.show_primary_checkout_button}}
-                    <div class="previewCartAction-checkout">
-                        <a href="{{urls.checkout.single_address}}" class="button button--small button--primary">
-                            {{lang 'cart.preview.checkout_now'}}
-                        </a>
-                    </div>
-                {{/if}}
-
-                <div class="previewCartAction-viewCart{{#unless cart.show_primary_checkout_button}} previewCartAction-viewCart--sole{{/unless}}">
-                    <a href="{{urls.cart}}" class="button button--small button--action">
-                        {{lang 'cart.preview.view_cart'}}
+            {{/each}}
+        </ul>
+        <div class="previewCartAction">
+            {{#if cart.show_primary_checkout_button}}
+                <div class="previewCartAction-checkout">
+                    <a href="{{urls.checkout.single_address}}" class="button button--small button--primary">
+                        {{lang 'cart.preview.checkout_now'}}
                     </a>
                 </div>
+            {{/if}}
 
-                {{#if cart.show_multiple_address_shipping}}
-                    <div class="previewCartAction-checkoutMultiple">
-                        <a href="{{urls.checkout.multiple_address}}">
-                            {{lang 'cart.preview.checkout_multiple'}}
-                        </a>
-                    </div>
-                {{/if}}
+            <div class="previewCartAction-viewCart{{#unless cart.show_primary_checkout_button}} previewCartAction-viewCart--sole{{/unless}}">
+                <a href="{{urls.cart}}" class="button button--small button--action">
+                    {{lang 'cart.preview.view_cart'}}
+                </a>
             </div>
+
+            {{#if cart.show_multiple_address_shipping}}
+                <div class="previewCartAction-checkoutMultiple">
+                    <a href="{{urls.checkout.multiple_address}}">
+                        {{lang 'cart.preview.checkout_multiple'}}
+                    </a>
+                </div>
+            {{/if}}
+        </div>
             {{#if cart.additional_checkout_buttons}}
                 <div class="previewCart-additionalCheckoutButtons">
                     {{#each cart.additional_checkout_buttons}}
@@ -80,6 +125,6 @@
             <div role="alert" aria-live="polite" aria-atomic="false" class="previewCart-emptyBody">
                 {{lang 'cart.checkout.empty_cart'}}
             </div>
-        {{/if}}
-    </div>
+    {{/if}}
+  </div>
 </div>
